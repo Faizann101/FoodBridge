@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}My Donations | FoodBridge{% endblock %}
+
+{% block content %}
+<section class="dashboard-header dashboard-header-row">
+    <div>
+        <span class="eyebrow">DONOR DASHBOARD</span>
+        <h1>Active donations</h1>
+        <p>Manage food listings that are still within their pickup window.</p>
+    </div>
+    <a href="{{ url_for('create_listing') }}" class="btn btn-primary btn-large">+ Add Food Listing</a>
+</section>
+
+<div class="donation-tabs">
+    <a href="{{ url_for('donor_dashboard') }}" class="donation-tab active" aria-current="page">Active Donations</a>
+    <a href="{{ url_for('past_donations') }}" class="donation-tab">Past Donations</a>
+</div>
+
+<section class="listing-section">
+    {% if listings %}
+        <div class="listing-grid">
+            {% for listing in listings %}
+                <article class="listing-card">
+                    <div class="listing-card-top">
+                        <span class="category-badge">{{ listing.category }}</span>
+                        <span class="status-badge status-{{ listing.status }}">{{ listing.status|capitalize }}</span>
+                    </div>
+                    <h2>{{ listing.food_name }}</h2>
+                    <p class="listing-description">{{ listing.description or "No additional description provided." }}</p>
+                    <div class="listing-info">
+                        <div>
+                            <span class="info-label">Original quantity</span>
+                            <strong>{{ listing.quantity }} {{ listing.unit }}</strong>
+                        </div>
+                        <div>
+                            <span class="info-label">Remaining quantity</span>
+                            <strong>{{ listing.available_quantity }} {{ listing.unit }}</strong>
+                        </div>
+                        <div>
+                            <span class="info-label">Pickup location</span>
+                            <strong>{{ listing.pickup_address }}</strong>
+                        </div>
+                        <div>
+                            <span class="info-label">Pickup deadline</span>
+                            <strong>{{ listing.pickup_deadline.strftime('%d %b %Y, %I:%M %p') if listing.pickup_deadline else 'Not specified' }}</strong>
+                        </div>
+                    </div>
+                    <div class="listing-card-actions">
+                        <a href="{{ url_for('donor_requests', listing_id=listing.listing_id) }}" class="btn btn-primary">Incoming Requests{% if listing.pending_request_count > 0 %}<span class="request-count-badge request-count-badge-small">{{ listing.pending_request_count }}</span>{% endif %}</a>
+                        <a href="{{ url_for('edit_listing', listing_id=listing.listing_id) }}" class="btn btn-outline">Edit Donation</a>
+                        <form method="POST" action="{{ url_for('cancel_listing', listing_id=listing.listing_id) }}"
+                              onsubmit="return confirm('Cancel this donation? Outstanding pending or approved requests will also be cancelled.');">
+                            <button type="submit" class="btn btn-danger">Cancel Donation</button>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🍲</div>
+            <h2>No active donations</h2>
+            <p>You don't have any active listings right now. Create a listing to make surplus food available, or check your past donations.</p>
+            <div class="empty-state-actions">
+                <a href="{{ url_for('create_listing') }}" class="btn btn-primary">Add Food Listing</a>
+                <a href="{{ url_for('past_donations') }}" class="btn btn-outline">View Past Donations</a>
+            </div>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

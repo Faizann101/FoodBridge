@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Food Details - FoodBridge{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ listing.food_name }}</h1>
+        <p>{{ listing.category }}</p>
+    </div>
+    <span class="status-badge status-{{ listing.status }}">
+        {{ listing.status|capitalize }}
+    </span>
+</div>
+
+<div class="listing-card">
+    <h2>Food Information</h2>
+
+    <p><strong>Description:</strong> {{ listing.description or 'No description provided.' }}</p>
+    <p><strong>Original quantity:</strong> {{ listing.quantity }} {{ listing.unit }}</p>
+    <p><strong>Available quantity:</strong> {{ listing.available_quantity }} {{ listing.unit }}</p>
+    <p><strong>Donor:</strong> {{ listing.donor_name }}</p>
+
+    {% if listing.organization_name %}
+        <p><strong>Organization:</strong> {{ listing.organization_name }}</p>
+    {% endif %}
+
+    <p><strong>Country:</strong> {{ listing.country }}</p>
+    <p><strong>City:</strong> {{ listing.city }}</p>
+
+    {% if listing.locality %}
+        <p><strong>Locality:</strong> {{ listing.locality }}</p>
+    {% endif %}
+
+    <p><strong>Pickup address:</strong> {{ listing.pickup_address }}</p>
+    <p><strong>Pickup deadline:</strong> {{ listing.pickup_deadline }}</p>
+
+    {% if session.get('role') == 'recipient' and listing.status == 'available' and listing.available_quantity > 0 %}
+        <hr>
+
+        <h2>Request This Food</h2>
+
+        <form method="POST" action="{{ url_for('request_food', listing_id=listing.listing_id) }}">
+            <div class="form-group">
+                <label for="requested_quantity">
+                    Quantity ({{ listing.unit }})
+                </label>
+
+                <input
+                    type="number"
+                    id="requested_quantity"
+                    name="requested_quantity"
+                    min="0.01"
+                    max="{{ listing.available_quantity }}"
+                    step="0.01"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Submit Food Request
+            </button>
+        </form>
+    {% elif session.get('role') == 'recipient' %}
+        <p>This listing is currently unavailable for new requests.</p>
+    {% endif %}
+</div>
+
+<a href="{{ url_for('recipient_dashboard') }}" class="btn btn-outline">
+    Back to Available Food
+</a>
+{% endblock %}

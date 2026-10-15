@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FoodBridge{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .request-count-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.35rem; height: 1.35rem; padding: 0 .35rem; margin-left: .3rem; border-radius: 999px; background: #d94841; color: #fff; font-size: .75rem; font-weight: 700; line-height: 1; }
+        .request-count-badge-small { min-width: 1.2rem; height: 1.2rem; font-size: .7rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="brand">FoodBridge</a>
+
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}">Home</a>
+
+                {% if session.get('user_id') %}
+                    {% if session.get('role') == 'donor' %}
+                        <a href="{{ url_for('create_listing') }}">Donate Food</a>
+                        <a href="{{ url_for('donor_dashboard') }}">Active Donations</a>
+                        <a href="{{ url_for('past_donations') }}">Past Donations</a>
+                        <a href="{{ url_for('donor_requests') }}">Incoming Requests{% if pending_request_count > 0 %}<span class="request-count-badge">{{ pending_request_count }}</span>{% endif %}</a>
+                    {% else %}
+                        <a href="{{ url_for('recipient_dashboard') }}">Find Food</a>
+                        <a href="{{ url_for('my_requests') }}" {% if request.endpoint == 'my_requests' %}aria-current="page"{% endif %}>My Requests</a>
+                        <a href="{{ url_for('past_requests') }}" {% if request.endpoint == 'past_requests' %}aria-current="page"{% endif %}>Past Requests</a>
+                    {% endif %}
+
+                    <a href="{{ url_for('profile') }}" {% if request.endpoint in ['profile', 'edit_profile'] %}aria-current="page"{% endif %}>Profile</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline">Log out</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Log in</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">Sign up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>FoodBridge — Connecting surplus food with communities.</p>
+    </footer>
+</body>
+</html>

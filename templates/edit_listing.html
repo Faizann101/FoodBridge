@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Donation | FoodBridge{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <header class="dashboard-header">
+        <span class="eyebrow">DONOR DASHBOARD</span>
+        <h1>Edit donation</h1>
+        <p>Update your food listing and pickup details.</p>
+    </header>
+
+    <form method="POST" class="form-card">
+        <div class="form-group">
+            <label for="food_name">Food name *</label>
+            <input id="food_name" name="food_name" type="text" required maxlength="150" value="{{ request.form.get('food_name', listing.food_name) }}">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4">{{ request.form.get('description', listing.description or '') }}</textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <input id="category" name="category" type="text" required value="{{ request.form.get('category', listing.category) }}">
+            </div>
+            <div class="form-group">
+                <label for="unit">Unit *</label>
+                <input id="unit" name="unit" type="text" required value="{{ request.form.get('unit', listing.unit) }}" placeholder="kg, portions, packs">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">Total quantity *</label>
+            <input id="quantity" name="quantity" type="number" min="0.01" step="0.01" required value="{{ request.form.get('quantity', listing.quantity) }}">
+            <small>Already reserved or collected: {{ "%.2f"|format((listing.quantity|float) - (listing.available_quantity|float)) }} {{ listing.unit }}. The total quantity cannot be reduced below this amount.</small>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="prepared_at">Prepared at</label>
+                <input id="prepared_at" name="prepared_at" type="datetime-local" value="{{ request.form.get('prepared_at', listing.prepared_at.strftime('%Y-%m-%dT%H:%M') if listing.prepared_at else '') }}">
+            </div>
+            <div class="form-group">
+                <label for="pickup_deadline">Pickup deadline *</label>
+                <input id="pickup_deadline" name="pickup_deadline" type="datetime-local" required value="{{ request.form.get('pickup_deadline', listing.pickup_deadline.strftime('%Y-%m-%dT%H:%M') if listing.pickup_deadline else '') }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="pickup_address">Pickup address *</label>
+            <input id="pickup_address" name="pickup_address" type="text" required value="{{ request.form.get('pickup_address', listing.pickup_address) }}">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="country">Country *</label>
+                <input id="country" name="country" type="text" required value="{{ request.form.get('country', listing.country) }}">
+            </div>
+            <div class="form-group">
+                <label for="city">City *</label>
+                <input id="city" name="city" type="text" required value="{{ request.form.get('city', listing.city) }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="locality">Locality *</label>
+            <input id="locality" name="locality" type="text" required value="{{ request.form.get('locality', listing.locality) }}">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-large">Save Changes</button>
+            <a href="{{ url_for('donor_dashboard') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

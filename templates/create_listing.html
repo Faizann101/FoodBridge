@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Donate Food | FoodBridge{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <div class="form-heading">
+        <span class="eyebrow">MAKE A DIFFERENCE</span>
+        <h1>List surplus food</h1>
+        <p>Provide accurate details so recipients can arrange collection.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('create_listing') }}" class="form-card">
+        <h2>Food details</h2>
+
+        <div class="form-group">
+            <label for="food_name">Food name *</label>
+            <input type="text" id="food_name" name="food_name" maxlength="150" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="3" placeholder="Describe the food, packaging, or other relevant details"></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="category">Food category *</label>
+                <select id="category" name="category" required>
+                    <option value="">Select a category</option>
+                    <option value="Cooked Meals">Cooked Meals</option>
+                    <option value="Bakery">Bakery</option>
+                    <option value="Fruits and Vegetables">Fruits and Vegetables</option>
+                    <option value="Packaged Food">Packaged Food</option>
+                    <option value="Dairy">Dairy</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="unit">Quantity unit *</label>
+                <select id="unit" name="unit" required>
+                    <option value="">Select a unit</option>
+                    <option value="servings">Servings</option>
+                    <option value="meals">Meals</option>
+                    <option value="kg">Kilograms (kg)</option>
+                    <option value="litres">Litres</option>
+                    <option value="packets">Packets</option>
+                    <option value="boxes">Boxes</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">Available quantity *</label>
+            <input type="number" id="quantity" name="quantity" min="1" step="1" required>
+        </div>
+
+        <div class="form-group">
+            <label for="prepared_at">Preparation date and time</label>
+            <input type="datetime-local" id="prepared_at" name="prepared_at">
+        </div>
+
+        <h2 class="form-section-heading">Pickup details</h2>
+
+        <div class="form-group">
+            <label for="country">Country *</label>
+            <input type="text" id="country" name="country" maxlength="100" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="city">City *</label>
+                <input type="text" id="city" name="city" maxlength="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="locality">Locality *</label>
+                <input type="text" id="locality" name="locality" maxlength="150" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="pickup_address">Full pickup address *</label>
+            <textarea id="pickup_address" name="pickup_address" rows="3" maxlength="500" required placeholder="Building name, street, landmark, etc."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="pickup_deadline">Pickup deadline *</label>
+            <input type="datetime-local" id="pickup_deadline" name="pickup_deadline" required>
+        </div>
+
+        <div class="form-note">
+            Please ensure the food is suitable for donation and provide accurate preparation and pickup information.
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full btn-large">
+            Publish Food Listing
+        </button>
+
+        <a href="{{ url_for('donor_dashboard') }}" class="cancel-link">Cancel and return to dashboard</a>
+    </form>
+</section>
+{% endblock %}

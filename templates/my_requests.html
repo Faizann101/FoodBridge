@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}My Requests | FoodBridge{% endblock %}
+{% block content %}
+<section class="dashboard-header">
+    <span class="eyebrow">RECIPIENT DASHBOARD</span>
+    <h1>My Requests</h1>
+    <p>Track requests waiting for a decision or awaiting collection.</p>
+    <div class="dashboard-tabs">
+        <a class="tab-link {% if active_tab == 'current' %}active{% endif %}" href="{{ url_for('my_requests') }}">My Requests</a>
+        <a class="tab-link {% if active_tab == 'past' %}active{% endif %}" href="{{ url_for('past_requests') }}">Past Requests</a>
+    </div>
+</section>
+{% if requests %}
+<div class="listing-grid">
+    {% for item in requests %}
+    <article class="listing-card">
+        <div class="listing-card-top">
+            <span class="category-badge">{{ item.category or 'Food' }}</span>
+            {% set shown_status = item.display_status if item.display_status is defined else item.status %}
+            <span class="status-badge status-{{ shown_status|lower|replace(' ', '-') }}">{{ shown_status|replace('_', ' ')|capitalize }}</span>
+        </div>
+        <h2>{{ item.food_name }}</h2>
+        <p><strong>Donor:</strong> {{ item.donor_name }}</p>
+        {% if item.status == 'approved' %}
+        <p><strong>Donor phone:</strong>
+            {% if item.donor_phone %}
+                <a href="tel:{{ item.donor_phone }}">{{ item.donor_phone }}</a>
+            {% else %}
+                Not provided
+            {% endif %}
+        </p>
+        {% endif %}
+        <p><strong>Requested quantity:</strong> {{ item.requested_quantity }} {{ item.unit }}</p>
+        <p><strong>Pickup address:</strong> {{ item.pickup_address }}</p>
+        <p><strong>Pickup deadline:</strong> {{ item.pickup_deadline }}</p>
+        <p><strong>Requested on:</strong> {{ item.requested_at }}</p>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    {% if active_tab == 'current' %}
+    <h2>No current requests</h2>
+    <p>You don't have any pending requests or approved requests awaiting collection.</p>
+    <a class="btn btn-primary" href="{{ url_for('recipient_dashboard') }}">Find Food</a>
+    {% else %}
+    <h2>No past requests yet</h2>
+    <p>Completed or inactive requests will appear here.</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
