@@ -26,6 +26,7 @@ def get_db():
         cursorclass=pymysql.cursors.DictCursor,
         autocommit=False,
         connect_timeout=15,
+        init_command="SET time_zone = '+05:30'",
     )
 
 
@@ -486,7 +487,7 @@ def create_listing():
             if prepared_at and prepared_at > datetime.now():
                 raise ValueError
         except (ValueError, TypeError):
-            flash("Check the quantity, preparation time and pickup deadline. The quantity must be above zero and the deadline must be in the future.", "danger")
+            flash("Check your dates and quantity: the quantity must be above zero, the preparation time can't be in the future, and the pickup deadline must be later than now.", "danger")
             return render_template("create_listing.html")
 
         if not all([food_name, category, unit, pickup_address, country, city, locality]):
@@ -574,7 +575,7 @@ def edit_listing(listing_id):
                 if prepared_at and prepared_at > datetime.now():
                     raise ValueError
             except (ValueError, TypeError):
-                flash("Check the quantity, preparation time and pickup deadline. The quantity must be above zero and the deadline must be in the future.", "danger")
+                flash("Check your dates and quantity: the quantity must be above zero, the preparation time can't be in the future, and the pickup deadline must be later than now.", "danger")
                 return render_template("edit_listing.html", listing=listing)
 
             if not all([food_name, category, unit, pickup_address, country, city, locality]):
