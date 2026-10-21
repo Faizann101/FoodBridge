@@ -6,36 +6,36 @@
     <title>{% block title %}FoodBridge{% endblock %}</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='foodbridge-favicon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .request-count-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.35rem; height: 1.35rem; padding: 0 .35rem; margin-left: .3rem; border-radius: 999px; background: #d94841; color: #fff; font-size: .75rem; font-weight: 700; line-height: 1; }
-        .request-count-badge-small { min-width: 1.2rem; height: 1.2rem; font-size: .7rem; }
-    </style>
 </head>
 <body>
+    {% set ep = request.endpoint %}
     <nav class="navbar">
         <div class="nav-container">
-            <a href="{{ url_for('index') }}" class="brand">FoodBridge</a>
+            <a href="{{ url_for('index') }}" class="brand">
+                <svg class="brand-mark" viewBox="0 0 28 28" aria-hidden="true">
+                    <circle cx="14" cy="14" r="14" fill="#f2b01e"/>
+                    <path d="M4 19c0-6 4.5-10 10-10s10 4 10 10" fill="none" stroke="#241b31" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M4 19h20" stroke="#241b31" stroke-width="2.6" stroke-linecap="round"/>
+                </svg>
+                FoodBridge
+            </a>
 
             <div class="nav-links">
-                <a href="{{ url_for('index') }}">Home</a>
-
                 {% if session.get('user_id') %}
                     {% if session.get('role') == 'donor' %}
-                        <a href="{{ url_for('create_listing') }}">Donate Food</a>
-                        <a href="{{ url_for('donor_dashboard') }}">Active Donations</a>
-                        <a href="{{ url_for('past_donations') }}">Past Donations</a>
-                        <a href="{{ url_for('donor_requests') }}">Incoming Requests{% if pending_request_count > 0 %}<span class="request-count-badge">{{ pending_request_count }}</span>{% endif %}</a>
+                        <a href="{{ url_for('create_listing') }}" {% if ep == 'create_listing' %}aria-current="page"{% endif %}>Donate food</a>
+                        <a href="{{ url_for('donor_dashboard') }}" {% if ep in ['donor_dashboard', 'past_donations', 'edit_listing'] %}aria-current="page"{% endif %}>My donations</a>
+                        <a href="{{ url_for('donor_requests') }}" {% if ep == 'donor_requests' %}aria-current="page"{% endif %}>Requests{% if pending_request_count > 0 %}<span class="request-count-badge">{{ pending_request_count }}</span>{% endif %}</a>
                     {% else %}
-                        <a href="{{ url_for('recipient_dashboard') }}">Find Food</a>
-                        <a href="{{ url_for('my_requests') }}" {% if request.endpoint == 'my_requests' %}aria-current="page"{% endif %}>My Requests</a>
-                        <a href="{{ url_for('past_requests') }}" {% if request.endpoint == 'past_requests' %}aria-current="page"{% endif %}>Past Requests</a>
+                        <a href="{{ url_for('recipient_dashboard') }}" {% if ep in ['recipient_dashboard', 'listing_detail'] %}aria-current="page"{% endif %}>Find food</a>
+                        <a href="{{ url_for('my_requests') }}" {% if ep in ['my_requests', 'past_requests'] %}aria-current="page"{% endif %}>My requests</a>
                     {% endif %}
 
-                    <a href="{{ url_for('profile') }}" {% if request.endpoint in ['profile', 'edit_profile'] %}aria-current="page"{% endif %}>Profile</a>
-                    <a href="{{ url_for('logout') }}" class="btn btn-outline">Log out</a>
+                    <a href="{{ url_for('profile') }}" {% if ep in ['profile', 'edit_profile'] %}aria-current="page"{% endif %}>Profile</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline btn-small">Log out</a>
                 {% else %}
                     <a href="{{ url_for('login') }}">Log in</a>
-                    <a href="{{ url_for('register') }}" class="btn btn-primary">Sign up</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-small">Sign up</a>
                 {% endif %}
             </div>
         </div>
@@ -44,7 +44,7 @@
     <main class="page-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
+                <div class="alert alert-{{ category }}" role="status">{{ message }}</div>
             {% endfor %}
         {% endwith %}
 
@@ -52,7 +52,7 @@
     </main>
 
     <footer class="footer">
-        <p>FoodBridge — Connecting surplus food with communities.</p>
+        <p>FoodBridge helps surplus food reach people who can use it.</p>
     </footer>
 </body>
 </html>

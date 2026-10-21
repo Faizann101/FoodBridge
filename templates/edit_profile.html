@@ -1,58 +1,63 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Profile | FoodBridge{% endblock %}
+{% block title %}Edit profile | FoodBridge{% endblock %}
 
 {% block content %}
-<section class="dashboard-header">
-    <span class="eyebrow">ACCOUNT SETTINGS</span>
-    <h1>Edit profile</h1>
-    <p>Update your contact and location details. Your email address and account role cannot be changed here.</p>
-</section>
+<section class="form-page">
+    <div class="form-heading">
+        <h1>Edit profile</h1>
+        <p>Your email and account type can't be changed here.</p>
+    </div>
 
-<section class="form-card profile-form-card">
-    <form method="POST" action="{{ url_for('edit_profile') }}">
+    <form method="POST" action="{{ url_for('edit_profile') }}" class="form-card profile-form-card">
         <div class="form-group">
             <label for="full_name">Full name *</label>
             <input type="text" id="full_name" name="full_name" value="{{ user.full_name or '' }}" maxlength="150" required>
         </div>
 
-        <div class="form-group">
-            <label for="email">Email address</label>
-            <input type="email" id="email" value="{{ user.email }}" disabled>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" value="{{ user.email }}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Account type</label>
+                <input type="text" id="role" value="{{ user.role|capitalize }}" disabled>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="organization_name">Organisation name</label>
+                <input type="text" id="organization_name" name="organization_name" value="{{ user.organization_name or '' }}" maxlength="200">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone number</label>
+                <input type="tel" id="phone" name="phone" value="{{ user.phone or '' }}" maxlength="30">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="country">Country *</label>
+                <input type="text" id="country" name="country" value="{{ user.country or '' }}" maxlength="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="city">City *</label>
+                <input type="text" id="city" name="city" value="{{ user.city or '' }}" maxlength="100" required>
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="role">Account type</label>
-            <input type="text" id="role" value="{{ user.role|capitalize }}" disabled>
-        </div>
-
-        <div class="form-group">
-            <label for="organization_name">Organization name</label>
-            <input type="text" id="organization_name" name="organization_name" value="{{ user.organization_name or '' }}" maxlength="200">
-        </div>
-
-        <div class="form-group">
-            <label for="phone">Phone number</label>
-            <input type="tel" id="phone" name="phone" value="{{ user.phone or '' }}" maxlength="30">
-        </div>
-
-        <div class="form-group">
-            <label for="country">Country *</label>
-            <input type="text" id="country" name="country" value="{{ user.country or '' }}" maxlength="100" required>
-        </div>
-
-        <div class="form-group">
-            <label for="city">City *</label>
-            <input type="text" id="city" name="city" value="{{ user.city or '' }}" maxlength="100" required>
-        </div>
-
-        <div class="form-group">
-            <label for="locality">Locality / Area</label>
+            <label for="locality">Locality</label>
             <input type="text" id="locality" name="locality" value="{{ user.locality or '' }}" maxlength="150">
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary btn-large">Save Changes</button>
+            <button type="submit" class="btn btn-primary btn-large">Save changes</button>
             <a href="{{ url_for('profile') }}" class="btn btn-outline">Cancel</a>
         </div>
     </form>

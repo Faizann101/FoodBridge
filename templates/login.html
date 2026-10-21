@@ -3,19 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | FoodBridge</title>
+    <title>Log in | FoodBridge</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='foodbridge-favicon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <main class="auth-container">
         <section class="auth-card">
-            <a href="{{ url_for('index') }}" class="brand">FoodBridge</a>
-            <h1>Welcome back</h1>
-            <p class="subtitle">Log in to continue connecting surplus food with people who need it.</p>
+            <a href="{{ url_for('index') }}" class="brand">
+                <svg class="brand-mark" viewBox="0 0 28 28" aria-hidden="true">
+                    <circle cx="14" cy="14" r="14" fill="#f2b01e"/>
+                    <path d="M4 19c0-6 4.5-10 10-10s10 4 10 10" fill="none" stroke="#241b31" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M4 19h20" stroke="#241b31" stroke-width="2.6" stroke-linecap="round"/>
+                </svg>
+                FoodBridge
+            </a>
+            <h1>Log in</h1>
+            <p class="subtitle">Pick up where you left off: list food or request what's available.</p>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    <div class="alert alert-{{ category }}" role="status">{{ message }}</div>
                 {% endfor %}
             {% endwith %}
 
@@ -30,12 +38,12 @@
                     <input type="password" id="password" name="password" required autocomplete="current-password">
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-full">Log in</button>
+                <button type="submit" class="btn btn-primary btn-full btn-large">Log in</button>
             </form>
 
             <p class="auth-footer">
-                Don't have an account?
-                <a href="{{ url_for('register') }}">Create one</a>
+                New to FoodBridge?
+                <a href="{{ url_for('register') }}">Create an account</a>
             </p>
         </section>
     </main>

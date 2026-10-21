@@ -3,79 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account | FoodBridge</title>
+    <title>Create an account | FoodBridge</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='foodbridge-favicon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <a href="{{ url_for('index') }}" class="brand">FoodBridge</a>
+    <main class="auth-container">
+        <section class="auth-card">
+            <a href="{{ url_for('index') }}" class="brand">
+                <svg class="brand-mark" viewBox="0 0 28 28" aria-hidden="true">
+                    <circle cx="14" cy="14" r="14" fill="#f2b01e"/>
+                    <path d="M4 19c0-6 4.5-10 10-10s10 4 10 10" fill="none" stroke="#241b31" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M4 19h20" stroke="#241b31" stroke-width="2.6" stroke-linecap="round"/>
+                </svg>
+                FoodBridge
+            </a>
             <h1>Create your account</h1>
-            <p class="subtitle">Join us in reducing food waste and fighting hunger.</p>
+            <p class="subtitle">Choose whether you'll donate food or request it. You can fill in the rest now.</p>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    <div class="alert alert-{{ category }}" role="status">{{ message }}</div>
                 {% endfor %}
             {% endwith %}
 
             <form method="POST" action="{{ url_for('register') }}">
                 <div class="form-group">
                     <label for="full_name">Full name *</label>
-                    <input type="text" id="full_name" name="full_name"
-                           maxlength="100" required autocomplete="name">
+                    <input type="text" id="full_name" name="full_name" maxlength="100" required autocomplete="name">
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email address *</label>
-                    <input type="email" id="email" name="email"
-                           maxlength="150" required autocomplete="email">
+                    <input type="email" id="email" name="email" maxlength="150" required autocomplete="email">
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password *</label>
-                    <input type="password" id="password" name="password"
-                           minlength="8" required autocomplete="new-password">
-                    <small>Use at least 8 characters.</small>
+                    <input type="password" id="password" name="password" minlength="8" required autocomplete="new-password">
+                    <small>At least 8 characters.</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="role">I want to join as *</label>
+                    <label for="role">I'm joining as *</label>
                     <select id="role" name="role" required>
-                        <option value="">Select account type</option>
-                        <option value="donor">Food Donor</option>
-                        <option value="recipient">Food Recipient / NGO</option>
+                        <option value="">Choose one</option>
+                        <option value="donor">Food donor (restaurant, caterer, household)</option>
+                        <option value="recipient">Food recipient (NGO or individual)</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="organization_name">Organization name (optional)</label>
-                    <input type="text" id="organization_name"
-                           name="organization_name" maxlength="150">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="organization_name">Organisation name</label>
+                        <input type="text" id="organization_name" name="organization_name" maxlength="150" placeholder="Optional">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone number</label>
+                        <input type="tel" id="phone" name="phone" maxlength="20" autocomplete="tel" placeholder="Optional">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="country">Country *</label>
+                        <input type="text" id="country" name="country" maxlength="100" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input type="text" id="city" name="city" maxlength="100" required>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="phone">Phone number (optional)</label>
-                    <input type="tel" id="phone" name="phone"
-                           maxlength="20" autocomplete="tel">
+                    <label for="locality">Locality</label>
+                    <input type="text" id="locality" name="locality" maxlength="150" placeholder="Neighbourhood or area (optional)">
                 </div>
-                <div class="form-group">
-    <label for="country">Country *</label>
-    <input type="text" id="country" name="country" maxlength="100" required>
-</div>
 
-<div class="form-group">
-    <label for="city">City *</label>
-    <input type="text" id="city" name="city" maxlength="100" required>
-</div>
-
-<div class="form-group">
-    <label for="locality">Locality</label>
-    <input type="text" id="locality" name="locality" maxlength="150">
-</div>
-                <button type="submit" class="btn btn-primary btn-full">
-                    Create Account
-                </button>
+                <button type="submit" class="btn btn-primary btn-full btn-large">Create account</button>
             </form>
 
             <p class="auth-footer">
@@ -83,10 +90,8 @@
                 <a href="{{ url_for('login') }}">Log in</a>
             </p>
 
-            <a href="{{ url_for('index') }}" class="back-link">
-                ← Back to home
-            </a>
-        </div>
-    </div>
+            <a href="{{ url_for('index') }}" class="back-link">Back to home</a>
+        </section>
+    </main>
 </body>
 </html>

@@ -1,33 +1,32 @@
 {% extends "base.html" %}
 
-{% block title %}Donate Food | FoodBridge{% endblock %}
+{% block title %}Donate food | FoodBridge{% endblock %}
 
 {% block content %}
 <section class="form-page">
     <div class="form-heading">
-        <span class="eyebrow">MAKE A DIFFERENCE</span>
-        <h1>List surplus food</h1>
-        <p>Provide accurate details so recipients can arrange collection.</p>
+        <h1>Donate food</h1>
+        <p>Add what's available and when it needs to be collected. Recipients nearby will see it straight away.</p>
     </div>
 
     <form method="POST" action="{{ url_for('create_listing') }}" class="form-card">
-        <h2>Food details</h2>
+        <h2>What's available</h2>
 
         <div class="form-group">
             <label for="food_name">Food name *</label>
-            <input type="text" id="food_name" name="food_name" maxlength="150" required>
+            <input type="text" id="food_name" name="food_name" maxlength="150" required placeholder="Vegetable biryani">
         </div>
 
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" rows="3" placeholder="Describe the food, packaging, or other relevant details"></textarea>
+            <textarea id="description" name="description" rows="3" placeholder="What it is, how it's packed, anything recipients should know"></textarea>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label for="category">Food category *</label>
+                <label for="category">Category *</label>
                 <select id="category" name="category" required>
-                    <option value="">Select a category</option>
+                    <option value="">Choose a category</option>
                     <option value="Cooked Meals">Cooked Meals</option>
                     <option value="Bakery">Bakery</option>
                     <option value="Fruits and Vegetables">Fruits and Vegetables</option>
@@ -38,9 +37,9 @@
             </div>
 
             <div class="form-group">
-                <label for="unit">Quantity unit *</label>
+                <label for="unit">Measured in *</label>
                 <select id="unit" name="unit" required>
-                    <option value="">Select a unit</option>
+                    <option value="">Choose a unit</option>
                     <option value="servings">Servings</option>
                     <option value="meals">Meals</option>
                     <option value="kg">Kilograms (kg)</option>
@@ -51,17 +50,20 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="quantity">Available quantity *</label>
-            <input type="number" id="quantity" name="quantity" min="1" step="1" required>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="quantity">Quantity available *</label>
+                <input type="number" id="quantity" name="quantity" min="1" step="1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="prepared_at">Prepared at</label>
+                <input type="datetime-local" id="prepared_at" name="prepared_at">
+                <small>Optional. Helps recipients judge freshness.</small>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="prepared_at">Preparation date and time</label>
-            <input type="datetime-local" id="prepared_at" name="prepared_at">
-        </div>
-
-        <h2 class="form-section-heading">Pickup details</h2>
+        <h2 class="form-section-heading">Pickup</h2>
 
         <div class="form-group">
             <label for="country">Country *</label>
@@ -81,24 +83,23 @@
         </div>
 
         <div class="form-group">
-            <label for="pickup_address">Full pickup address *</label>
-            <textarea id="pickup_address" name="pickup_address" rows="3" maxlength="500" required placeholder="Building name, street, landmark, etc."></textarea>
+            <label for="pickup_address">Pickup address *</label>
+            <textarea id="pickup_address" name="pickup_address" rows="3" maxlength="500" required placeholder="Building, street, nearby landmark"></textarea>
         </div>
 
         <div class="form-group">
-            <label for="pickup_deadline">Pickup deadline *</label>
+            <label for="pickup_deadline">Collect by *</label>
             <input type="datetime-local" id="pickup_deadline" name="pickup_deadline" required>
+            <small>After this time the listing closes automatically.</small>
         </div>
 
         <div class="form-note">
-            Please ensure the food is suitable for donation and provide accurate preparation and pickup information.
+            Only list food that is safe to eat and has been stored properly. Recipients rely on these details.
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full btn-large">
-            Publish Food Listing
-        </button>
+        <button type="submit" class="btn btn-primary btn-full btn-large">Publish listing</button>
 
-        <a href="{{ url_for('donor_dashboard') }}" class="cancel-link">Cancel and return to dashboard</a>
+        <a href="{{ url_for('donor_dashboard') }}" class="cancel-link">Cancel</a>
     </form>
 </section>
 {% endblock %}

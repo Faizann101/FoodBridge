@@ -1,23 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}{% if selected_listing %}Requests for {{ selected_listing.food_name }}{% else %}Incoming Requests{% endif %} | FoodBridge{% endblock %}
+{% block title %}{% if selected_listing %}Requests for {{ selected_listing.food_name }}{% else %}Requests{% endif %} | FoodBridge{% endblock %}
 
 {% block content %}
 <section class="dashboard-header dashboard-header-row">
     <div>
-        <span class="eyebrow">DONOR DASHBOARD</span>
         {% if selected_listing %}
             <h1>Requests for {{ selected_listing.food_name }}</h1>
-            <p>Review recipient requests for this specific donation.</p>
+            <p>Everyone who has asked for this donation.</p>
         {% else %}
-            <h1>Incoming requests</h1>
-            <p>Review requests from recipients across all your food donations.</p>
+            <h1>Requests</h1>
+            <p>People asking for your food, across all your donations.</p>
         {% endif %}
     </div>
     {% if selected_listing %}
-        <a href="{{ url_for('donor_requests') }}" class="btn btn-outline">View All Requests</a>
+        <a href="{{ url_for('donor_requests') }}" class="btn btn-outline">All requests</a>
     {% else %}
-        <a href="{{ url_for('donor_dashboard') }}" class="btn btn-outline">My Donations</a>
+        <a href="{{ url_for('donor_dashboard') }}" class="btn btn-outline">My donations</a>
     {% endif %}
 </section>
 
@@ -27,78 +26,75 @@
             {% for item in requests %}
                 <article class="listing-card">
                     <div class="listing-card-top">
-                        <span class="category-badge">{{ item.food_name }}</span>
+                        <span class="category-badge">Request #{{ item.request_id }}</span>
                         <span class="status-badge status-{{ item.status }}">{{ item.status|capitalize }}</span>
                     </div>
-                    <h2>Request #{{ item.request_id }}</h2>
-                    <div class="listing-info">
-                        <div>
-                            <span class="info-label">Requested by</span>
-                            <strong>{{ item.recipient_name }}</strong>
+                    <div class="listing-body">
+                        <h2>{{ item.requested_quantity }} {{ item.unit }} of {{ item.food_name }}</h2>
+                        <div class="listing-info">
+                            <div>
+                                <span class="info-label">Requested by</span>
+                                <strong>{{ item.recipient_name }}</strong>
+                            </div>
+                            <div>
+                                <span class="info-label">Organisation</span>
+                                <strong>{{ item.recipient_organization or "Individual" }}</strong>
+                            </div>
+                            {% if item.status == 'approved' %}
+                            <div>
+                                <span class="info-label">Their phone</span>
+                                <strong>
+                                    {% if item.recipient_phone %}
+                                        <a href="tel:{{ item.recipient_phone }}">{{ item.recipient_phone }}</a>
+                                    {% else %}
+                                        Not provided
+                                    {% endif %}
+                                </strong>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <span class="info-label">Collect by</span>
+                                <strong>{{ item.pickup_deadline.strftime('%d %b %Y, %I:%M %p') if item.pickup_deadline else 'Not specified' }}</strong>
+                            </div>
+                            <div>
+                                <span class="info-label">Requested on</span>
+                                <strong>{{ item.requested_at.strftime('%d %b %Y, %I:%M %p') if item.requested_at else 'Not specified' }}</strong>
+                            </div>
+                            <div class="info-wide">
+                                <span class="info-label">Pickup address</span>
+                                <strong>{{ item.pickup_address }}</strong>
+                            </div>
                         </div>
-                        <div>
-                            <span class="info-label">Organization</span>
-                            <strong>{{ item.recipient_organization or "Individual recipient" }}</strong>
-                        </div>
-                        {% if item.status == 'approved' %}
-                        <div>
-                            <span class="info-label">Recipient phone</span>
-                            <strong>
-                                {% if item.recipient_phone %}
-                                    <a href="tel:{{ item.recipient_phone }}">{{ item.recipient_phone }}</a>
-                                {% else %}
-                                    Not provided
-                                {% endif %}
-                            </strong>
-                        </div>
+                        {% if item.status == 'pending' %}
+                            <div class="listing-card-actions">
+                                <form method="POST" action="{{ url_for('handle_food_request', request_id=item.request_id, action='approve') }}">
+                                    <button type="submit" class="btn btn-primary">Approve</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('handle_food_request', request_id=item.request_id, action='reject') }}"
+                                      onsubmit="return confirm('Reject this request? The held quantity goes back on the listing.');">
+                                    <button type="submit" class="btn btn-danger">Reject</button>
+                                </form>
+                            </div>
+                        {% elif item.status == 'approved' %}
+                            <div class="listing-card-actions">
+                                <form method="POST" action="{{ url_for('mark_collected', request_id=item.request_id) }}">
+                                    <button type="submit" class="btn btn-primary">Mark as collected</button>
+                                </form>
+                            </div>
                         {% endif %}
-                        <div>
-                            <span class="info-label">Requested quantity</span>
-                            <strong>{{ item.requested_quantity }} {{ item.unit }}</strong>
-                        </div>
-                        <div>
-                            <span class="info-label">Pickup deadline</span>
-                            <strong>{{ item.pickup_deadline.strftime('%d %b %Y, %I:%M %p') if item.pickup_deadline else 'Not specified' }}</strong>
-                        </div>
-                        <div>
-                            <span class="info-label">Pickup location</span>
-                            <strong>{{ item.pickup_address }}</strong>
-                        </div>
-                        <div>
-                            <span class="info-label">Request submitted</span>
-                            <strong>{{ item.requested_at.strftime('%d %b %Y, %I:%M %p') if item.requested_at else 'Not specified' }}</strong>
-                        </div>
                     </div>
-                    {% if item.status == 'pending' %}
-                        <div class="listing-card-actions">
-                            <form method="POST" action="{{ url_for('handle_food_request', request_id=item.request_id, action='approve') }}">
-                                <button type="submit" class="btn btn-primary">Approve Request</button>
-                            </form>
-                            <form method="POST" action="{{ url_for('handle_food_request', request_id=item.request_id, action='reject') }}"
-                                  onsubmit="return confirm('Reject this request? The reserved quantity will be released.');">
-                                <button type="submit" class="btn btn-danger">Reject Request</button>
-                            </form>
-                        </div>
-                    {% elif item.status == 'approved' %}
-                        <div class="listing-card-actions">
-                            <form method="POST" action="{{ url_for('mark_collected', request_id=item.request_id) }}">
-                                <button type="submit" class="btn btn-primary">Mark as Collected</button>
-                            </form>
-                        </div>
-                    {% endif %}
                 </article>
             {% endfor %}
         </div>
     </section>
 {% else %}
     <div class="empty-state">
-        <div class="empty-icon">📨</div>
-        <h2>{% if selected_listing %}No requests for this donation{% else %}No incoming requests yet{% endif %}</h2>
-        <p>{% if selected_listing %}Requests for this donation will appear here when recipients request it.{% else %}Requests from recipients will appear here when someone requests one of your donations.{% endif %}</p>
+        <h2>{% if selected_listing %}No requests for this donation yet{% else %}No requests yet{% endif %}</h2>
+        <p>{% if selected_listing %}When someone requests this donation, you'll see it here.{% else %}When someone requests one of your donations, you'll see it here.{% endif %}</p>
         {% if selected_listing %}
-            <a href="{{ url_for('donor_requests') }}" class="btn btn-primary">View All Requests</a>
+            <a href="{{ url_for('donor_requests') }}" class="btn btn-primary">All requests</a>
         {% else %}
-            <a href="{{ url_for('donor_dashboard') }}" class="btn btn-primary">Back to My Donations</a>
+            <a href="{{ url_for('donor_dashboard') }}" class="btn btn-primary">Back to my donations</a>
         {% endif %}
     </div>
 {% endif %}

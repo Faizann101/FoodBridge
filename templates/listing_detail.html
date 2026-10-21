@@ -1,72 +1,89 @@
 {% extends "base.html" %}
 
-{% block title %}Food Details - FoodBridge{% endblock %}
+{% block title %}{{ listing.food_name }} | FoodBridge{% endblock %}
 
 {% block content %}
-<div class="page-header">
+{% set is_recipient = session.get('role') == 'recipient' %}
+{% set can_request = is_recipient and listing.status == 'available' and listing.available_quantity > 0 %}
+
+<a href="{{ url_for('recipient_dashboard') }}" class="back-link">Back to Find food</a>
+
+<div class="detail-header">
     <div>
+        <span class="category-badge">{{ listing.category }}</span>
         <h1>{{ listing.food_name }}</h1>
-        <p>{{ listing.category }}</p>
     </div>
-    <span class="status-badge status-{{ listing.status }}">
-        {{ listing.status|capitalize }}
-    </span>
+    <span class="status-badge status-{{ listing.status }}">{{ listing.status|capitalize }}</span>
 </div>
 
-<div class="listing-card">
-    <h2>Food Information</h2>
+<div class="detail-layout{% if not is_recipient %} single{% endif %}">
+    <section class="detail-card">
+        <h2>About this food</h2>
+        <p class="detail-description">{{ listing.description or 'The donor did not add a description.' }}</p>
 
-    <p><strong>Description:</strong> {{ listing.description or 'No description provided.' }}</p>
-    <p><strong>Original quantity:</strong> {{ listing.quantity }} {{ listing.unit }}</p>
-    <p><strong>Available quantity:</strong> {{ listing.available_quantity }} {{ listing.unit }}</p>
-    <p><strong>Donor:</strong> {{ listing.donor_name }}</p>
-
-    {% if listing.organization_name %}
-        <p><strong>Organization:</strong> {{ listing.organization_name }}</p>
-    {% endif %}
-
-    <p><strong>Country:</strong> {{ listing.country }}</p>
-    <p><strong>City:</strong> {{ listing.city }}</p>
-
-    {% if listing.locality %}
-        <p><strong>Locality:</strong> {{ listing.locality }}</p>
-    {% endif %}
-
-    <p><strong>Pickup address:</strong> {{ listing.pickup_address }}</p>
-    <p><strong>Pickup deadline:</strong> {{ listing.pickup_deadline }}</p>
-
-    {% if session.get('role') == 'recipient' and listing.status == 'available' and listing.available_quantity > 0 %}
-        <hr>
-
-        <h2>Request This Food</h2>
-
-        <form method="POST" action="{{ url_for('request_food', listing_id=listing.listing_id) }}">
-            <div class="form-group">
-                <label for="requested_quantity">
-                    Quantity ({{ listing.unit }})
-                </label>
-
-                <input
-                    type="number"
-                    id="requested_quantity"
-                    name="requested_quantity"
-                    min="0.01"
-                    max="{{ listing.available_quantity }}"
-                    step="0.01"
-                    required
-                >
+        <div class="detail-info">
+            <div>
+                <span class="info-label">Available now</span>
+                <strong>{{ listing.available_quantity }} {{ listing.unit }}</strong>
             </div>
+            <div>
+                <span class="info-label">Originally listed</span>
+                <strong>{{ listing.quantity }} {{ listing.unit }}</strong>
+            </div>
+            <div>
+                <span class="info-label">Donated by</span>
+                <strong>{{ listing.donor_name }}</strong>
+            </div>
+            {% if listing.organization_name %}
+            <div>
+                <span class="info-label">Organisation</span>
+                <strong>{{ listing.organization_name }}</strong>
+            </div>
+            {% endif %}
+            <div>
+                <span class="info-label">Collect by</span>
+                <strong>{{ listing.pickup_deadline.strftime('%d %b %Y, %I:%M %p') if listing.pickup_deadline.strftime is defined else listing.pickup_deadline }}</strong>
+            </div>
+            <div>
+                <span class="info-label">Area</span>
+                <strong>{{ listing.locality or '' }}{% if listing.locality and listing.city %}, {% endif %}{{ listing.city }}, {{ listing.country }}</strong>
+            </div>
+            <div class="info-wide">
+                <span class="info-label">Pickup address</span>
+                <strong>{{ listing.pickup_address }}</strong>
+            </div>
+        </div>
+    </section>
 
-            <button type="submit" class="btn btn-primary">
-                Submit Food Request
-            </button>
-        </form>
-    {% elif session.get('role') == 'recipient' %}
-        <p>This listing is currently unavailable for new requests.</p>
+    {% if is_recipient %}
+    <aside class="request-card">
+        {% if can_request %}
+            <h2>Request this food</h2>
+            <p>Tell the donor how much you need. That amount is held for you while they review your request.</p>
+
+            <form method="POST" action="{{ url_for('request_food', listing_id=listing.listing_id) }}">
+                <div class="form-group">
+                    <label for="requested_quantity">How much do you need? ({{ listing.unit }})</label>
+                    <input
+                        type="number"
+                        id="requested_quantity"
+                        name="requested_quantity"
+                        min="0.01"
+                        max="{{ listing.available_quantity }}"
+                        step="0.01"
+                        required
+                    >
+                    <small>Up to {{ listing.available_quantity }} {{ listing.unit }} is available.</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full btn-large">Send request</button>
+            </form>
+        {% else %}
+            <h2>No longer available</h2>
+            <p>This listing can't take new requests right now.</p>
+            <a href="{{ url_for('recipient_dashboard', show_all=1) }}" class="btn btn-outline">See other listings</a>
+        {% endif %}
+    </aside>
     {% endif %}
 </div>
-
-<a href="{{ url_for('recipient_dashboard') }}" class="btn btn-outline">
-    Back to Available Food
-</a>
 {% endblock %}

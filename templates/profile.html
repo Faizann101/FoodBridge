@@ -1,16 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}My Profile | FoodBridge{% endblock %}
+{% block title %}Profile | FoodBridge{% endblock %}
 
 {% block content %}
 <section class="profile-page">
     <header class="profile-page-header">
         <div>
-            <span class="eyebrow">ACCOUNT</span>
-            <h1>My profile</h1>
-            <p>View your account details and keep your contact information up to date.</p>
+            <h1>Profile</h1>
+            <p>Your account details. Keep your contact information current so donors and recipients can reach you.</p>
         </div>
-        <a href="{{ url_for('edit_profile') }}" class="btn btn-primary btn-large">Edit Profile</a>
+        <a href="{{ url_for('edit_profile') }}" class="btn btn-primary btn-large">Edit profile</a>
     </header>
 
     <section class="profile-card">
@@ -19,28 +18,26 @@
                 {{ (user.full_name.split() | map('first') | join('') | upper)[:2] }}
             </div>
             <div class="profile-identity-text">
-                <span class="profile-overline">FOODBRIDGE MEMBER</span>
                 <h2>{{ user.full_name }}</h2>
-                <p>{{ user.role|capitalize }}</p>
-                {% if user.role == 'donor' and user.organization_name %}
+                {% if user.organization_name %}
                     <span class="profile-organization">{{ user.organization_name }}</span>
                 {% endif %}
             </div>
             <span class="profile-role-badge profile-role-{{ user.role }}">
-                {{ user.role|capitalize }} account
+                {{ user.role|capitalize }}
             </span>
         </div>
 
         <div class="profile-details">
             <section class="profile-detail-section">
-                <h3>Contact information</h3>
+                <h3>Contact</h3>
                 <div class="profile-detail-grid">
                     <div class="profile-detail-item">
-                        <span class="profile-detail-label">Email address</span>
+                        <span class="profile-detail-label">Email</span>
                         <strong>{{ user.email }}</strong>
                     </div>
                     <div class="profile-detail-item">
-                        <span class="profile-detail-label">Phone number</span>
+                        <span class="profile-detail-label">Phone</span>
                         <strong>{{ user.phone or 'Not provided' }}</strong>
                     </div>
                 </div>
@@ -64,8 +61,8 @@
                 </div>
             </section>
 
-            <section class="profile-detail-section profile-account-section">
-                <h3>Account details</h3>
+            <section class="profile-detail-section">
+                <h3>Account</h3>
                 <div class="profile-detail-grid">
                     <div class="profile-detail-item">
                         <span class="profile-detail-label">Account type</span>
@@ -75,19 +72,8 @@
                         <span class="profile-detail-label">Member since</span>
                         <strong>{{ user.created_at.strftime('%d %b %Y') if user.created_at else 'Not available' }}</strong>
                     </div>
-                    {% if user.role == 'donor' and user.organization_name %}
-                    <div class="profile-detail-item">
-                        <span class="profile-detail-label">Organization</span>
-                        <strong>{{ user.organization_name }}</strong>
-                    </div>
-                    {% endif %}
                 </div>
             </section>
-        </div>
-
-        <div class="profile-card-footer">
-            <span>Need to update your details?</span>
-            <a href="{{ url_for('edit_profile') }}">Edit your profile <span aria-hidden="true">→</span></a>
         </div>
     </section>
 </section>

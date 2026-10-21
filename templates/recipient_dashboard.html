@@ -1,31 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %}Find Food | FoodBridge{% endblock %}
+{% block title %}Find food | FoodBridge{% endblock %}
 
 {% block content %}
 <section class="dashboard-header">
-    <span class="eyebrow">RECIPIENT DASHBOARD</span>
-    <h1>Find Food</h1>
-    <p>Discover available food donations near you.</p>
+    <h1>Find food</h1>
+    <p>Browse what donors have listed and request the amount you need.</p>
 </section>
 
 <section class="search-panel">
     <form method="GET" action="{{ url_for('recipient_dashboard') }}" class="food-search-form">
         <div class="form-group">
-            <label for="search">Search food</label>
-            <input type="text" id="search" name="search" value="{{ search_filter }}" placeholder="e.g. rice, bread, vegetables">
+            <label for="search">Food</label>
+            <input type="text" id="search" name="search" value="{{ search_filter }}" placeholder="Rice, bread, vegetables">
         </div>
         <div class="form-group">
             <label for="country">Country</label>
-            <input type="text" id="country" name="country" value="{{ country_filter }}" placeholder="Enter country">
+            <input type="text" id="country" name="country" value="{{ country_filter }}">
         </div>
         <div class="form-group">
             <label for="city">City</label>
-            <input type="text" id="city" name="city" value="{{ city_filter }}" placeholder="Enter city">
+            <input type="text" id="city" name="city" value="{{ city_filter }}">
         </div>
         <div class="search-actions">
-            <button type="submit" class="btn btn-primary">Search / Filter</button>
-            <a href="{{ url_for('recipient_dashboard', show_all=1) }}" class="btn btn-outline">Show All Listings</a>
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a href="{{ url_for('recipient_dashboard', show_all=1) }}" class="btn btn-outline">Show all listings</a>
             {% if browsing_requested %}
                 <a href="{{ url_for('recipient_dashboard') }}" class="btn btn-outline">Clear</a>
             {% endif %}
@@ -36,9 +35,8 @@
 <section class="listing-section">
     {% if not browsing_requested %}
         <div class="empty-state">
-            <div class="empty-icon">🍲</div>
-            <h2>Ready to find food?</h2>
-            <p>Search by food name, enter a country or city, or show all currently available listings.</p>
+            <h2>Start with a search</h2>
+            <p>Look up a food or a place, or show every listing that's open right now.</p>
         </div>
     {% elif listings %}
         <div class="section-heading">
@@ -52,40 +50,43 @@
                         <span class="category-badge">{{ listing.category }}</span>
                         <span class="status-badge status-available">Available</span>
                     </div>
-                    <h2>{{ listing.food_name }}</h2>
-                    <p class="listing-description">{{ listing.description or "No additional description provided." }}</p>
-                    <div class="listing-info">
-                        <div>
-                            <span class="info-label">Available quantity</span>
-                            <strong>{{ listing.available_quantity }} {{ listing.unit }}</strong>
+                    <div class="listing-body">
+                        <h2>{{ listing.food_name }}</h2>
+                        <p class="listing-description">{{ listing.description or "No description added." }}</p>
+                        <div class="listing-info">
+                            <div>
+                                <span class="info-label">Available</span>
+                                <strong>{{ listing.available_quantity }} {{ listing.unit }}</strong>
+                            </div>
+                            <div>
+                                <span class="info-label">From</span>
+                                <strong>{{ listing.organization_name or listing.donor_name }}</strong>
+                            </div>
+                            <div>
+                                <span class="info-label">Collect by</span>
+                                <strong>{{ listing.pickup_deadline.strftime('%d %b %Y, %I:%M %p') if listing.pickup_deadline else 'Not specified' }}</strong>
+                            </div>
+                            <div>
+                                <span class="info-label">Area</span>
+                                <strong>{{ listing.locality or '' }}{% if listing.locality and listing.city %}, {% endif %}{{ listing.city }}{% if listing.country %}, {{ listing.country }}{% endif %}</strong>
+                            </div>
+                            <div class="info-wide">
+                                <span class="info-label">Pickup address</span>
+                                <strong>{{ listing.pickup_address }}</strong>
+                            </div>
                         </div>
-                        <div>
-                            <span class="info-label">Donated by</span>
-                            <strong>{{ listing.organization_name or listing.donor_name }}</strong>
-                        </div>
-                        <div>
-                            <span class="info-label">Location</span>
-                            <strong>{{ listing.locality or '' }}{% if listing.locality and listing.city %}, {% endif %}{{ listing.city }}{% if listing.country %}, {{ listing.country }}{% endif %}</strong>
-                        </div>
-                        <div>
-                            <span class="info-label">Pickup address</span>
-                            <strong>{{ listing.pickup_address }}</strong>
-                        </div>
-                        <div>
-                            <span class="info-label">Pickup deadline</span>
-                            <strong>{{ listing.pickup_deadline.strftime('%d %b %Y, %I:%M %p') if listing.pickup_deadline else 'Not specified' }}</strong>
+                        <div class="listing-card-actions">
+                            <a href="{{ url_for('listing_detail', listing_id=listing.listing_id) }}" class="btn btn-primary">View and request</a>
                         </div>
                     </div>
-                    <a href="{{ url_for('listing_detail', listing_id=listing.listing_id) }}" class="btn btn-primary">View Details &amp; Request</a>
                 </article>
             {% endfor %}
         </div>
     {% else %}
         <div class="empty-state">
-            <div class="empty-icon">🔎</div>
-            <h2>No food listings found</h2>
-            <p>Try another food name or adjust your country and city filters.</p>
-            <a href="{{ url_for('recipient_dashboard', show_all=1) }}" class="btn btn-outline">Show All Listings</a>
+            <h2>Nothing matches that search</h2>
+            <p>Try a different food name, or widen the country and city.</p>
+            <a href="{{ url_for('recipient_dashboard', show_all=1) }}" class="btn btn-outline">Show all listings</a>
         </div>
     {% endif %}
 </section>

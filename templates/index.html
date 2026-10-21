@@ -1,83 +1,92 @@
 {% extends "base.html" %}
 
-{% block title %}FoodBridge | Share Food, Reduce Waste{% endblock %}
+{% block title %}FoodBridge | Share surplus food before it goes to waste{% endblock %}
 
 {% block content %}
 <section class="hero">
     <div class="hero-content">
-        <span class="hero-badge">FOOD DONATION & REDISTRIBUTION</span>
-
-        <h1>Good food deserves<br>a <span class="highlight">second chance.</span></h1>
+        <h1>Extra food tonight? Someone nearby can use it.</h1>
 
         <p>
-            Connect surplus food with the communities that need it.
-            FoodBridge makes donating, discovering, and collecting food simple.
+            FoodBridge lets restaurants, caterers and households list the food
+            they can't use, and lets NGOs and individuals request it for pickup.
         </p>
 
         <div class="hero-actions">
             {% if session.get('user_id') %}
                 {% if session.get('role') == 'donor' %}
-                    <a href="{{ url_for('create_listing') }}" class="btn btn-primary btn-large">Donate Food</a>
-                    <a href="{{ url_for('donor_dashboard') }}" class="btn btn-outline btn-large">My Donations</a>
+                    <a href="{{ url_for('create_listing') }}" class="btn btn-primary btn-large">Donate food</a>
+                    <a href="{{ url_for('donor_dashboard') }}" class="btn btn-outline btn-large">My donations</a>
                 {% else %}
-                    <a href="{{ url_for('recipient_dashboard') }}" class="btn btn-primary btn-large">Find Available Food</a>
-                    <a href="{{ url_for('my_requests') }}" class="btn btn-outline btn-large">My Requests</a>
+                    <a href="{{ url_for('recipient_dashboard') }}" class="btn btn-primary btn-large">Find food</a>
+                    <a href="{{ url_for('my_requests') }}" class="btn btn-outline btn-large">My requests</a>
                 {% endif %}
             {% else %}
-                <a href="{{ url_for('register') }}" class="btn btn-primary btn-large">Get Started</a>
-                <a href="{{ url_for('login') }}" class="btn btn-outline btn-large">Log In</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-large">Create an account</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline btn-large">Log in</a>
             {% endif %}
         </div>
     </div>
 
     <div class="hero-visual">
-        <div class="visual-card">
-            <div class="visual-icon">🥗</div>
-            <h3>Share what you can</h3>
-            <p>Turn surplus food into an opportunity to help.</p>
-        </div>
-        <div class="visual-card visual-card-offset">
-            <div class="visual-icon">🤝</div>
-            <h3>Connect locally</h3>
-            <p>Help food reach people and organisations nearby.</p>
-        </div>
+        <article class="listing-card" aria-label="Example of a food listing">
+            <div class="listing-card-top">
+                <span class="category-badge">Cooked meals</span>
+                <span class="status-badge status-available">Available</span>
+            </div>
+            <div class="listing-body">
+                <h2>Vegetable biryani</h2>
+                <p class="listing-description">Freshly cooked, packed in sealed boxes.</p>
+                <div class="listing-info">
+                    <div>
+                        <span class="info-label">Quantity</span>
+                        <strong>40 servings</strong>
+                    </div>
+                    <div>
+                        <span class="info-label">Collect by</span>
+                        <strong>Today, 8:30 PM</strong>
+                    </div>
+                    <div class="info-wide">
+                        <span class="info-label">Pickup address</span>
+                        <strong>Corner Kitchen, 14 Market Street</strong>
+                    </div>
+                </div>
+            </div>
+        </article>
+        <p class="hero-caption">An example of what donors post.</p>
     </div>
 </section>
 
-<section class="features">
+<section class="steps">
     <div class="section-heading">
-        <span class="eyebrow">HOW IT WORKS</span>
-        <h2>Three steps. One shared purpose.</h2>
-        <p>A simple process for donors and recipient organisations.</p>
+        <h2>How it works</h2>
+        <p>Donors list, recipients request, and the donor approves.</p>
     </div>
 
-    <div class="feature-grid">
-        <article class="feature-card">
-            <div class="feature-number">01</div>
-            <h3>List surplus food</h3>
-            <p>Donors publish available food, quantities, locations, and pickup deadlines.</p>
-        </article>
-
-        <article class="feature-card">
-            <div class="feature-number">02</div>
-            <h3>Find and request</h3>
-            <p>Recipients explore available listings and request the quantities they need.</p>
-        </article>
-
-        <article class="feature-card">
-            <div class="feature-number">03</div>
-            <h3>Approve and collect</h3>
-            <p>Donors review requests and coordinate collection with recipients.</p>
-        </article>
-    </div>
+    <ol class="step-list">
+        <li>
+            <span class="step-number">1</span>
+            <h3>List what's left over</h3>
+            <p>Add the food, how much there is, where to collect it and the time it must be picked up by.</p>
+        </li>
+        <li>
+            <span class="step-number">2</span>
+            <h3>Recipients request a share</h3>
+            <p>People and NGOs browse listings and ask for the amount they need. That amount is held for them.</p>
+        </li>
+        <li>
+            <span class="step-number">3</span>
+            <h3>Approve and hand over</h3>
+            <p>The donor approves a request, both sides get each other's contact details, and the food is marked collected.</p>
+        </li>
+    </ol>
 </section>
 
+{% if not session.get('user_id') %}
 <section class="cta-section">
-    <h2>Make surplus food count.</h2>
-    <p>Join FoodBridge and help connect available food with community needs.</p>
-
-    {% if not session.get('user_id') %}
-        <a href="{{ url_for('register') }}" class="btn btn-light btn-large">Create Your Account</a>
-    {% endif %}
+    <h2>Have food to share, or people to feed?</h2>
+    <p>Sign up as a donor or a recipient. It takes about a minute.</p>
+    <a href="{{ url_for('register') }}" class="btn btn-light btn-large">Create an account</a>
 </section>
+{% endif %}
 {% endblock %}

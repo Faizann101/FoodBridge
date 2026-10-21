@@ -33,7 +33,7 @@ def login_required(view):
     @wraps(view)
     def wrapped_view(*args, **kwargs):
         if "user_id" not in session:
-            flash("Please log in to continue.", "warning")
+            flash("Log in to continue.", "warning")
             return redirect(url_for("login"))
         return view(*args, **kwargs)
     return wrapped_view
@@ -45,7 +45,7 @@ def role_required(role):
         @login_required
         def wrapped_view(*args, **kwargs):
             if session.get("role") != role:
-                flash("You do not have permission to access that page.", "danger")
+                flash("That page isn't available for your account type.", "danger")
                 return redirect(url_for("index"))
             return view(*args, **kwargs)
         return wrapped_view
@@ -120,13 +120,13 @@ def register():
         locality = request.form.get("locality", "").strip() or None
 
         if not all([full_name, email, password, country, city]):
-            flash("Please fill in all required fields.", "danger")
+            flash("Fill in all the required fields to continue.", "danger")
             return render_template("register.html")
         if role not in ("donor", "recipient"):
-            flash("Please select a valid account type.", "danger")
+            flash("Choose whether you're joining as a donor or a recipient.", "danger")
             return render_template("register.html")
         if len(password) < 8:
-            flash("Your password must contain at least 8 characters.", "danger")
+            flash("Your password needs at least 8 characters.", "danger")
             return render_template("register.html")
 
         connection = None
@@ -146,17 +146,17 @@ def register():
                     ),
                 )
             connection.commit()
-            flash("Account created. You can now log in.", "success")
+            flash("Account created. Log in to get started.", "success")
             return redirect(url_for("login"))
         except pymysql.err.IntegrityError:
             if connection:
                 connection.rollback()
-            flash("An account with that email already exists.", "danger")
+            flash("There's already an account with that email. Try logging in instead.", "danger")
         except Exception:
             if connection:
                 connection.rollback()
             app.logger.exception("Registration failed")
-            flash("Registration failed. Please try again.", "danger")
+            flash("We couldn't create your account. Try again in a moment.", "danger")
         finally:
             close_connection(connection)
 
@@ -182,7 +182,7 @@ def login():
                 user = cursor.fetchone()
         except Exception:
             app.logger.exception("Login database query failed")
-            flash("Login is temporarily unavailable. Please try again.", "danger")
+            flash("We couldn't log you in right now. Try again in a moment.", "danger")
             user = None
         finally:
             close_connection(connection)
@@ -195,7 +195,7 @@ def login():
             flash("Welcome back!", "success")
             return redirect(url_for("dashboard"))
 
-        flash("Invalid email or password.", "danger")
+        flash("That email and password don't match. Check them and try again.", "danger")
     return render_template("login.html")
 
 
@@ -210,7 +210,7 @@ def dashboard():
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
     session.clear()
-    flash("You have been logged out.", "success")
+    flash("You're logged out.", "success")
     return redirect(url_for("index"))
 
 
@@ -234,14 +234,14 @@ def profile():
             user = cursor.fetchone()
     except Exception:
         app.logger.exception("Loading profile failed")
-        flash("Could not load your profile. Please try again.", "danger")
+        flash("We couldn't load your profile. Try again in a moment.", "danger")
         return redirect(url_for("dashboard"))
     finally:
         close_connection(connection)
 
     if not user:
         session.clear()
-        flash("Your account could not be found. Please log in again.", "warning")
+        flash("We couldn't find your account. Log in again to continue.", "warning")
         return redirect(url_for("login"))
 
     return render_template("profile.html", user=user)
@@ -268,14 +268,14 @@ def edit_profile():
             user = cursor.fetchone()
     except Exception:
         app.logger.exception("Loading profile for editing failed")
-        flash("Could not load your profile. Please try again.", "danger")
+        flash("We couldn't load your profile. Try again in a moment.", "danger")
         return redirect(url_for("dashboard"))
     finally:
         close_connection(connection)
 
     if not user:
         session.clear()
-        flash("Your account could not be found. Please log in again.", "warning")
+        flash("We couldn't find your account. Log in again to continue.", "warning")
         return redirect(url_for("login"))
 
     if request.method == "POST":
@@ -287,7 +287,7 @@ def edit_profile():
         locality = request.form.get("locality", "").strip() or None
 
         if not full_name or not country or not city:
-            flash("Name, country, and city are required.", "danger")
+            flash("Name, country and city are required.", "danger")
             user.update({
                 "full_name": full_name,
                 "organization_name": organization_name,
@@ -316,13 +316,13 @@ def edit_profile():
                 )
             connection.commit()
             session["full_name"] = full_name
-            flash("Your profile has been updated.", "success")
+            flash("Profile updated.", "success")
             return redirect(url_for("profile"))
         except Exception:
             if connection:
                 connection.rollback()
             app.logger.exception("Updating profile failed")
-            flash("Could not save your changes. Please try again.", "danger")
+            flash("We couldn't save your changes. Try again in a moment.", "danger")
         finally:
             close_connection(connection)
 
@@ -486,11 +486,11 @@ def create_listing():
             if prepared_at and prepared_at > datetime.now():
                 raise ValueError
         except (ValueError, TypeError):
-            flash("Enter a positive quantity, a valid preparation time, and a future pickup deadline.", "danger")
+            flash("Check the quantity, preparation time and pickup deadline. The quantity must be above zero and the deadline must be in the future.", "danger")
             return render_template("create_listing.html")
 
         if not all([food_name, category, unit, pickup_address, country, city, locality]):
-            flash("Please complete all required fields.", "danger")
+            flash("Fill in all the required fields to continue.", "danger")
             return render_template("create_listing.html")
 
         connection = None
@@ -512,13 +512,13 @@ def create_listing():
                     ),
                 )
             connection.commit()
-            flash("Food listing created successfully.", "success")
+            flash("Your listing is live. Recipients can now request it.", "success")
             return redirect(url_for("donor_dashboard"))
         except Exception:
             if connection:
                 connection.rollback()
             app.logger.exception("Creating food listing failed")
-            flash("Could not create the listing. Please try again.", "danger")
+            flash("We couldn't publish your listing. Try again in a moment.", "danger")
         finally:
             close_connection(connection)
     return render_template("create_listing.html")
@@ -544,7 +544,7 @@ def edit_listing(listing_id):
             listing = cursor.fetchone()
 
         if not listing:
-            flash("Donation listing not found.", "danger")
+            flash("We couldn't find that donation.", "danger")
             return redirect(url_for("donor_dashboard"))
 
         if listing["status"] not in ("available", "reserved") or listing["pickup_deadline"] <= datetime.now():
@@ -574,11 +574,11 @@ def edit_listing(listing_id):
                 if prepared_at and prepared_at > datetime.now():
                     raise ValueError
             except (ValueError, TypeError):
-                flash("Enter a positive quantity, a valid preparation time, and a future pickup deadline.", "danger")
+                flash("Check the quantity, preparation time and pickup deadline. The quantity must be above zero and the deadline must be in the future.", "danger")
                 return render_template("edit_listing.html", listing=listing)
 
             if not all([food_name, category, unit, pickup_address, country, city, locality]):
-                flash("Please complete all required fields.", "danger")
+                flash("Fill in all the required fields to continue.", "danger")
                 return render_template("edit_listing.html", listing=listing)
 
             connection.begin()
@@ -595,19 +595,19 @@ def edit_listing(listing_id):
                 current = cursor.fetchone()
                 if not current:
                     connection.rollback()
-                    flash("Donation listing not found.", "danger")
+                    flash("We couldn't find that donation.", "danger")
                     return redirect(url_for("donor_dashboard"))
                 if current["status"] not in ("available", "reserved") or current["pickup_deadline"] <= datetime.now():
                     connection.rollback()
-                    flash("This donation is no longer active and cannot be edited.", "warning")
+                    flash("This donation is no longer active, so it can't be edited.", "warning")
                     return redirect(url_for("past_donations"))
 
                 committed_quantity = float(current["quantity"]) - float(current["available_quantity"])
                 if quantity + 1e-9 < committed_quantity:
                     connection.rollback()
                     flash(
-                        f"Total quantity cannot be less than {committed_quantity:g} {unit}, "
-                        "because that amount is already reserved or collected.",
+                        f"The total can't go below {committed_quantity:g} {unit}, "
+                        "because that much is already reserved or collected.",
                         "danger",
                     )
                     listing.update({
@@ -645,14 +645,14 @@ def edit_listing(listing_id):
                     ),
                 )
             connection.commit()
-            flash("Donation updated successfully.", "success")
+            flash("Changes saved.", "success")
             return redirect(url_for("donor_dashboard"))
 
     except Exception:
         if connection:
             connection.rollback()
         app.logger.exception("Editing donation listing failed")
-        flash("Could not update this donation. Please try again.", "danger")
+        flash("We couldn't save those changes. Try again in a moment.", "danger")
     finally:
         close_connection(connection)
 
@@ -679,7 +679,7 @@ def cancel_listing(listing_id):
             listing = cursor.fetchone()
             if not listing:
                 connection.rollback()
-                flash("Donation listing not found.", "danger")
+                flash("We couldn't find that donation.", "danger")
                 return redirect(url_for("donor_dashboard"))
             if listing["status"] not in ("available", "reserved") or listing["pickup_deadline"] <= datetime.now():
                 connection.rollback()
@@ -714,12 +714,12 @@ def cancel_listing(listing_id):
                 (listing_id, session["user_id"]),
             )
         connection.commit()
-        flash("Donation cancelled. Outstanding requests were cancelled and the history was preserved.", "success")
+        flash("Donation cancelled. Open requests for it were cancelled too, and it's kept under Past donations.", "success")
     except Exception:
         if connection:
             connection.rollback()
         app.logger.exception("Cancelling donation listing failed")
-        flash("Could not cancel this donation. Please try again.", "danger")
+        flash("We couldn't cancel this donation. Try again in a moment.", "danger")
     finally:
         close_connection(connection)
 
@@ -747,7 +747,7 @@ def listing_detail(listing_id):
         close_connection(connection)
 
     if not listing:
-        flash("That food listing could not be found.", "danger")
+        flash("We couldn't find that listing. It may have been removed.", "danger")
         return redirect(url_for("recipient_dashboard"))
     return render_template("listing_detail.html", listing=listing)
 
@@ -760,7 +760,7 @@ def request_food(listing_id):
         if not requested_quantity.is_finite() or requested_quantity <= 0:
             raise ValueError
     except (TypeError, ValueError, InvalidOperation, AttributeError):
-        flash("Enter a valid positive quantity.", "danger")
+        flash("Enter a quantity above zero.", "danger")
         return redirect(url_for("listing_detail", listing_id=listing_id))
 
     connection = None
@@ -785,7 +785,7 @@ def request_food(listing_id):
                 or requested_quantity > listing["available_quantity"]
             ):
                 connection.rollback()
-                flash("This listing is unavailable or there is not enough quantity remaining.", "danger")
+                flash("This listing is closed or doesn't have enough left for your request.", "danger")
                 return redirect(url_for("recipient_dashboard"))
 
             cursor.execute(
@@ -801,7 +801,7 @@ def request_food(listing_id):
             existing = cursor.fetchone()
             if existing:
                 connection.rollback()
-                flash("You already have an active request for this listing.", "warning")
+                flash("You already have an open request for this listing.", "warning")
                 return redirect(url_for("my_requests"))
 
             cursor.execute(
@@ -823,13 +823,13 @@ def request_food(listing_id):
                 (requested_quantity, requested_quantity, listing_id),
             )
         connection.commit()
-        flash("Request submitted. The quantity is reserved while the donor reviews it.", "success")
+        flash("Request sent. The quantity is held for you while the donor reviews it.", "success")
         return redirect(url_for("my_requests"))
     except Exception:
         if connection:
             connection.rollback()
         app.logger.exception("Food request failed")
-        flash("Could not submit the request. Please try again.", "danger")
+        flash("We couldn't send your request. Try again in a moment.", "danger")
         return redirect(url_for("recipient_dashboard"))
     finally:
         close_connection(connection)
@@ -934,7 +934,7 @@ def donor_requests():
                 selected_listing = cursor.fetchone()
 
                 if not selected_listing:
-                    flash("That donation could not be found.", "warning")
+                    flash("We couldn't find that donation.", "warning")
                     return redirect(url_for("donor_requests"))
 
                 cursor.execute(
@@ -984,7 +984,7 @@ def donor_requests():
 @role_required("donor")
 def handle_food_request(request_id, action):
     if action not in ("approve", "reject"):
-        flash("Invalid request action.", "danger")
+        flash("That action isn't available for this request.", "danger")
         return redirect(url_for("donor_requests"))
 
     connection = None
@@ -1005,11 +1005,11 @@ def handle_food_request(request_id, action):
             item = cursor.fetchone()
             if not item or item["donor_id"] != session["user_id"]:
                 connection.rollback()
-                flash("Request not found.", "danger")
+                flash("We couldn't find that request.", "danger")
                 return redirect(url_for("donor_requests"))
             if item["status"] != "pending":
                 connection.rollback()
-                flash("This request has already been processed.", "warning")
+                flash("This request has already been approved or rejected.", "warning")
                 return redirect(url_for("donor_requests"))
 
             if action == "approve":
@@ -1024,7 +1024,7 @@ def handle_food_request(request_id, action):
                     """,
                     (request_id, item["requested_quantity"]),
                 )
-                flash_message = "Request approved. The recipient can now arrange collection."
+                flash_message = "Request approved. Their phone number is now visible so you can arrange pickup."
             else:
                 cursor.execute(
                     "UPDATE food_requests SET status = 'rejected', updated_at = NOW() WHERE request_id = %s",
@@ -1039,7 +1039,7 @@ def handle_food_request(request_id, action):
                     """,
                     (item["requested_quantity"], item["listing_id"]),
                 )
-                flash_message = "Request rejected and its reserved quantity released."
+                flash_message = "Request rejected. The held quantity is back on the listing."
 
         connection.commit()
         flash(flash_message, "success")
@@ -1047,7 +1047,7 @@ def handle_food_request(request_id, action):
         if connection:
             connection.rollback()
         app.logger.exception("Processing food request failed")
-        flash("Could not process the request. Please try again.", "danger")
+        flash("We couldn't update that request. Try again in a moment.", "danger")
     finally:
         close_connection(connection)
     return redirect(url_for("donor_requests"))
@@ -1074,7 +1074,7 @@ def mark_collected(request_id):
             item = cursor.fetchone()
             if not item or item["donor_id"] != session["user_id"]:
                 connection.rollback()
-                flash("Request not found.", "danger")
+                flash("We couldn't find that request.", "danger")
                 return redirect(url_for("donor_requests"))
             if item["status"] != "approved":
                 connection.rollback()
@@ -1110,12 +1110,12 @@ def mark_collected(request_id):
                 (item["listing_id"],),
             )
         connection.commit()
-        flash("Collection marked as completed.", "success")
+        flash("Marked as collected.", "success")
     except Exception:
         if connection:
             connection.rollback()
         app.logger.exception("Marking collection failed")
-        flash("Could not update the collection. Please try again.", "danger")
+        flash("We couldn't mark that as collected. Try again in a moment.", "danger")
     finally:
         close_connection(connection)
     return redirect(url_for("donor_requests"))

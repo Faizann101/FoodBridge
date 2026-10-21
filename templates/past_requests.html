@@ -1,43 +1,58 @@
 {% extends "base.html" %}
-{% block title %}Past Requests | FoodBridge{% endblock %}
+{% block title %}Past requests | FoodBridge{% endblock %}
 {% block content %}
 <section class="dashboard-header">
-    <span class="eyebrow">RECIPIENT DASHBOARD</span>
-    <h1>Past Requests</h1>
-    <p>Review collected, rejected, cancelled, expired, or otherwise inactive requests.</p>
-    <div class="dashboard-tabs">
-        <a class="tab-link {% if active_tab == 'current' %}active{% endif %}" href="{{ url_for('my_requests') }}">My Requests</a>
-        <a class="tab-link {% if active_tab == 'past' %}active{% endif %}" href="{{ url_for('past_requests') }}">Past Requests</a>
-    </div>
+    <h1>My requests</h1>
+    <p>Requests that were collected, rejected, cancelled or expired.</p>
 </section>
+
+<div class="donation-tabs">
+    <a href="{{ url_for('my_requests') }}" class="donation-tab {% if active_tab == 'current' %}active{% endif %}" {% if active_tab == 'current' %}aria-current="page"{% endif %}>Current</a>
+    <a href="{{ url_for('past_requests') }}" class="donation-tab {% if active_tab == 'past' %}active{% endif %}" {% if active_tab == 'past' %}aria-current="page"{% endif %}>Past</a>
+</div>
+
 {% if requests %}
 <div class="listing-grid">
     {% for item in requests %}
+    {% set shown_status = item.display_status if item.display_status is defined else item.status %}
     <article class="listing-card">
         <div class="listing-card-top">
             <span class="category-badge">{{ item.category or 'Food' }}</span>
-            {% set shown_status = item.display_status if item.display_status is defined else item.status %}
             <span class="status-badge status-{{ shown_status|lower|replace(' ', '-') }}">{{ shown_status|replace('_', ' ')|capitalize }}</span>
         </div>
-        <h2>{{ item.food_name }}</h2>
-        <p><strong>Donor:</strong> {{ item.donor_name }}</p>
-        <p><strong>Requested quantity:</strong> {{ item.requested_quantity }} {{ item.unit }}</p>
-        <p><strong>Pickup address:</strong> {{ item.pickup_address }}</p>
-        <p><strong>Pickup deadline:</strong> {{ item.pickup_deadline }}</p>
-        <p><strong>Requested on:</strong> {{ item.requested_at }}</p>
+        <div class="listing-body">
+            <h2>{{ item.food_name }}</h2>
+            <div class="listing-info">
+                <div>
+                    <span class="info-label">You asked for</span>
+                    <strong>{{ item.requested_quantity }} {{ item.unit }}</strong>
+                </div>
+                <div>
+                    <span class="info-label">Donor</span>
+                    <strong>{{ item.donor_name }}</strong>
+                </div>
+                <div>
+                    <span class="info-label">Collect by</span>
+                    <strong>{{ item.pickup_deadline.strftime('%d %b %Y, %I:%M %p') if item.pickup_deadline.strftime is defined else item.pickup_deadline }}</strong>
+                </div>
+                <div>
+                    <span class="info-label">Requested on</span>
+                    <strong>{{ item.requested_at.strftime('%d %b %Y, %I:%M %p') if item.requested_at.strftime is defined else item.requested_at }}</strong>
+                </div>
+                <div class="info-wide">
+                    <span class="info-label">Pickup address</span>
+                    <strong>{{ item.pickup_address }}</strong>
+                </div>
+            </div>
+        </div>
     </article>
     {% endfor %}
 </div>
 {% else %}
 <div class="empty-state">
-    {% if active_tab == 'current' %}
-    <h2>No current requests</h2>
-    <p>You don't have any pending requests or approved requests awaiting collection.</p>
-    <a class="btn btn-primary" href="{{ url_for('recipient_dashboard') }}">Find Food</a>
-    {% else %}
     <h2>No past requests yet</h2>
-    <p>Completed or inactive requests will appear here.</p>
-    {% endif %}
+    <p>Once a request is collected, rejected or expires, it will be listed here.</p>
+    <a class="btn btn-primary" href="{{ url_for('recipient_dashboard') }}">Find food</a>
 </div>
 {% endif %}
 {% endblock %}

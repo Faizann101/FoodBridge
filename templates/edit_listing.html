@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Donation | FoodBridge{% endblock %}
+{% block title %}Edit donation | FoodBridge{% endblock %}
 
 {% block content %}
+{% set categories = ['Cooked Meals', 'Bakery', 'Fruits and Vegetables', 'Packaged Food', 'Dairy', 'Other'] %}
+{% set units = {'servings': 'Servings', 'meals': 'Meals', 'kg': 'Kilograms (kg)', 'litres': 'Litres', 'packets': 'Packets', 'boxes': 'Boxes'} %}
+{% set current_category = request.form.get('category', listing.category) %}
+{% set current_unit = request.form.get('unit', listing.unit) %}
+
 <section class="form-page">
-    <header class="dashboard-header">
-        <span class="eyebrow">DONOR DASHBOARD</span>
+    <header class="form-heading">
         <h1>Edit donation</h1>
-        <p>Update your food listing and pickup details.</p>
+        <p>Update the food or pickup details. Changes show up for recipients straight away.</p>
     </header>
 
     <form method="POST" class="form-card">
@@ -24,18 +28,32 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="category">Category *</label>
-                <input id="category" name="category" type="text" required value="{{ request.form.get('category', listing.category) }}">
+                <select id="category" name="category" required>
+                    {% if current_category not in categories %}
+                        <option value="{{ current_category }}" selected>{{ current_category }}</option>
+                    {% endif %}
+                    {% for c in categories %}
+                        <option value="{{ c }}" {% if c == current_category %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group">
-                <label for="unit">Unit *</label>
-                <input id="unit" name="unit" type="text" required value="{{ request.form.get('unit', listing.unit) }}" placeholder="kg, portions, packs">
+                <label for="unit">Measured in *</label>
+                <select id="unit" name="unit" required>
+                    {% if current_unit not in units %}
+                        <option value="{{ current_unit }}" selected>{{ current_unit }}</option>
+                    {% endif %}
+                    {% for u, label in units.items() %}
+                        <option value="{{ u }}" {% if u == current_unit %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
 
         <div class="form-group">
             <label for="quantity">Total quantity *</label>
             <input id="quantity" name="quantity" type="number" min="0.01" step="0.01" required value="{{ request.form.get('quantity', listing.quantity) }}">
-            <small>Already reserved or collected: {{ "%.2f"|format((listing.quantity|float) - (listing.available_quantity|float)) }} {{ listing.unit }}. The total quantity cannot be reduced below this amount.</small>
+            <small>{{ "%.2f"|format((listing.quantity|float) - (listing.available_quantity|float)) }} {{ listing.unit }} is already reserved or collected, so the total can't go below that.</small>
         </div>
 
         <div class="form-row">
@@ -44,7 +62,7 @@
                 <input id="prepared_at" name="prepared_at" type="datetime-local" value="{{ request.form.get('prepared_at', listing.prepared_at.strftime('%Y-%m-%dT%H:%M') if listing.prepared_at else '') }}">
             </div>
             <div class="form-group">
-                <label for="pickup_deadline">Pickup deadline *</label>
+                <label for="pickup_deadline">Collect by *</label>
                 <input id="pickup_deadline" name="pickup_deadline" type="datetime-local" required value="{{ request.form.get('pickup_deadline', listing.pickup_deadline.strftime('%Y-%m-%dT%H:%M') if listing.pickup_deadline else '') }}">
             </div>
         </div>
@@ -71,7 +89,7 @@
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary btn-large">Save Changes</button>
+            <button type="submit" class="btn btn-primary btn-large">Save changes</button>
             <a href="{{ url_for('donor_dashboard') }}" class="btn btn-outline">Cancel</a>
         </div>
     </form>
